@@ -1,0 +1,74 @@
+---
+
+    - name: Install all packages
+      dnf:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - httpd
+        - php
+        - php-mysql
+        - mariadb-server
+        - vim
+
+    - name: Ensure httpd is running
+      service:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+      with_items:
+        - httpd
+        - mariadb
+      tags:
+        - services_running
+
+    - name: Open firewall
+      firewalld:
+        service: http
+        permanent: true
+        immediate: true
+        state: enabled
+      tags:
+        - open_firewall
+
+    - name: Copy virtualhost
+      copy:
+        src: test_vhost.txt
+        dest: /etc/httpd/conf.d/test_vhost.conf
+      notify:
+        - restart httpd
+      tags:
+        - httpd_configs
+
+    - name: Copy templated virtualhost
+      template:
+        src: test_vhost.conf.j2
+        dest: /etc/httpd/conf.d/test_vhost_template.conf
+        owner: root
+        group: root
+        mode: 0644
+      notify:
+        - restart httpd
+      tags:
+        - httpd_configs
+
+    - name: Adjust servertokens for apache
+      lineinfile:
+        dest: /etc/httpd/conf/httpd.conf
+        regexp: "^#?ServerTokens"
+        line: "ServerTokens Prod"
+        state: present
+        insertafter: "^ServerRoot"
+      notify:
+        - restart httpd
+      tags:
+        - lineinfile
+
+    - include: list_files.yml
+      tags:
+        - list_files
+
+
+
+
+

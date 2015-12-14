@@ -1,0 +1,10 @@
+<Virtualhost *:80>
+# This server runs {{ ansible_distribution }}
+{% for ipv6_address in ansible_eth0['ipv6'] %}
+# This server has an IPv6 address: {{ ipv6_address['address'] }}
+{% endfor %}
+# Here's what I put for foo: {{ foo }}
+ServerName {{ ansible_hostname }}
+DocumentRoot /var/www/html/
+</VirtualHost>
+

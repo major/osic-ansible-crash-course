@@ -1,0 +1,11 @@
+---
+
+    - name: List a directory
+      shell: ls /tmp | grep pipXXX
+      register: directory_list
+      ignore_errors: yes
+
+    - name: Fail when ls fails
+      fail:
+        msg: "The ls didn't work"
+      when: directory_list.rc != 0
